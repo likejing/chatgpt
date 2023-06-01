@@ -2,10 +2,6 @@
   "version": 2,
   "routes": [
     {
-      "src": "/prod-api/(.*)",
-      "dest": "https://api.qzdcg.com/prod-api/$1"
-    },
-    {
       "src": "/admin-api/(.*)",
       "dest": "https://api.metass.top/admin-api/$1"
     },

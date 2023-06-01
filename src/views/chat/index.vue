@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
@@ -95,7 +95,7 @@ function contextualAssemblyData() {
   }
 
   // 如果上下文字符数超过 4096，删除最开始的一组对话
-  while (getContextLength() > 4096) {
+  while (getContextLength() > 2096) {
     // 寻找第一个用户对话
     const userIndex = conversation.findIndex(msg => msg.role === 'user')
     if (userIndex === -1) {
@@ -136,14 +136,16 @@ async function onConversation() {
 
   addChat(
     +uuid,
-    {
-      dateTime: new Date().toLocaleString(),
-      text: message,
-      inversion: true,
-      error: false,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: null },
-    },
+		{
+			dateTime: new Date().toLocaleString(),
+			text: message,
+			inversion: true,
+			error: false,
+			conversationOptions: null,
+			requestOptions: {prompt: message, options: null},
+			img: '',
+			taskId: ''
+		},
   )
   scrollToBottom()
 
@@ -159,15 +161,17 @@ async function onConversation() {
 
   addChat(
     +uuid,
-    {
-      dateTime: new Date().toLocaleString(),
-      text: '',
-      loading: true,
-      inversion: false,
-      error: false,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: { ...options } },
-    },
+		{
+			dateTime: new Date().toLocaleString(),
+			text: '',
+			loading: true,
+			inversion: false,
+			error: false,
+			conversationOptions: null,
+			requestOptions: {prompt: message, options: {...options}},
+			img: '',
+			taskId: ''
+		},
   )
   scrollToBottom()
 
@@ -189,15 +193,17 @@ async function onConversation() {
             updateChat(
               +uuid,
               dataSources.value.length - 1,
-              {
-                dateTime: new Date().toLocaleString(),
-                text: lastText,
-                inversion: false,
-                error: false,
-                loading: false,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                requestOptions: { prompt: message, options: { ...options } },
-              },
+							{
+								dateTime: new Date().toLocaleString(),
+								text: lastText,
+								inversion: false,
+								error: false,
+								loading: false,
+								conversationOptions: {conversationId: data.conversationId, parentMessageId: data.id},
+								requestOptions: {prompt: message, options: {...options}},
+								img: '',
+								taskId: ''
+							},
             )
 
             scrollToBottomIfAtBottom()
@@ -207,15 +213,17 @@ async function onConversation() {
             updateChat(
               +uuid,
               dataSources.value.length - 1,
-              {
-                dateTime: new Date().toLocaleString(),
-                text: `错误：${error.message || '发生了未知错误'}`,
-                inversion: false,
-                error: true,
-                loading: false,
-                conversationOptions: {},
-                requestOptions: { prompt: message, options: { ...options } },
-              },
+							{
+								dateTime: new Date().toLocaleString(),
+								text: `错误：${error.message || '发生了未知错误'}`,
+								inversion: false,
+								error: true,
+								loading: false,
+								conversationOptions: {},
+								requestOptions: {prompt: message, options: {...options}},
+								img: '',
+								taskId: ''
+							},
             )
             scrollToBottomIfAtBottom()
             console.error('Error occurred during fetchChatAPIOnce:', error)
@@ -260,14 +268,16 @@ async function onConversation() {
       +uuid,
       dataSources.value.length - 1,
       {
-        dateTime: new Date().toLocaleString(),
-        text: errorMessage,
-        inversion: false,
-        error: true,
-        loading: false,
-        conversationOptions: null,
-        requestOptions: { prompt: message, options: { ...options } },
-      },
+				dateTime: new Date().toLocaleString(),
+				text: errorMessage,
+				inversion: false,
+				error: true,
+				loading: false,
+				conversationOptions: null,
+				requestOptions: {prompt: message, options: {...options}},
+				img: '',
+				taskId: ''
+			},
     )
     scrollToBottomIfAtBottom()
   }
@@ -298,15 +308,17 @@ async function onRegenerate(index: number) {
   updateChat(
     +uuid,
     index,
-    {
-      dateTime: new Date().toLocaleString(),
-      text: '',
-      inversion: false,
-      error: false,
-      loading: true,
-      conversationOptions: null,
-      requestOptions: { prompt: message, ...options },
-    },
+		{
+			dateTime: new Date().toLocaleString(),
+			text: '',
+			inversion: false,
+			error: false,
+			loading: true,
+			conversationOptions: null,
+			requestOptions: {prompt: message, ...options},
+			img: '',
+			taskId: ''
+		},
   )
 
   try {
@@ -330,6 +342,8 @@ async function onRegenerate(index: number) {
               {
                 dateTime: new Date().toLocaleString(),
                 text: lastText,
+                taskId: '',
+                img: '',
                 inversion: false,
                 error: false,
                 loading: false,
@@ -364,15 +378,17 @@ async function onRegenerate(index: number) {
     updateChat(
       +uuid,
       index,
-      {
-        dateTime: new Date().toLocaleString(),
-        text: errorMessage,
-        inversion: false,
-        error: true,
-        loading: false,
-        conversationOptions: null,
-        requestOptions: { prompt: message, ...options },
-      },
+			{
+				dateTime: new Date().toLocaleString(),
+				text: errorMessage,
+				inversion: false,
+				error: true,
+				loading: false,
+				conversationOptions: null,
+				requestOptions: {prompt: message, ...options},
+				img: '',
+				taskId: ''
+			},
     )
   }
   finally {
@@ -512,8 +528,16 @@ const handleVoiceSubmit = () => {
     handleSubmit()
 }
 
+// 热问词
+const hotList = reactive(['帮大学老师写一篇论文', '一根香蕉的热量是？', '为西游记写一个番外故事', '讲一下黑暗森林法则', '巴西足球为什么这么厉害', '推荐几本经济学数据'])
+const handleHotWord = (item: string) => {
+  prompt.value = item
+  handleSubmit()
+}
+
 onMounted(() => {
-  scrollToBottom()
+	chatStore.updateRemainingMessages()
+	scrollToBottom()
   if (inputRef.value && !isMobile.value)
     inputRef.value?.focus()
 })
@@ -541,10 +565,21 @@ onUnmounted(() => {
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
           <template v-if="!dataSources.length">
-            <div class="flex items-center justify-center mt-4 text-center text-neutral-300">
+            <div class="flex mt-4 mb-2 items-center justify-center">
+              <h2>您可以这样提问？</h2>
+              <SvgIcon icon="ri:refresh" />
+            </div>
+            <div class="hot-content">
+              <template v-for="(innerItem) in hotList">
+                <div class="hot-item" @click="handleHotWord(innerItem)">
+                  <span>{{ innerItem }}</span>
+                </div>
+              </template>
+            </div>
+            <!-- <div class="flex items-center justify-center mt-4 text-center text-neutral-300">
               <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
               <span>Aha~</span>
-            </div>
+            </div> -->
           </template>
           <template v-else>
             <div>
@@ -604,3 +639,26 @@ onUnmounted(() => {
     </footer>
   </div>
 </template>
+
+<style scoped lang="less">
+.hot-content{
+text-align: center;
+.hot-item{
+width: 15rem;
+height: 4rem;
+padding: 1rem;
+margin: 0 .5rem 1rem .5rem;
+border-radius: 5px;
+background-color: #f5f5f5;
+display: inline-flex;
+align-items: center;
+cursor: pointer;
+// &:nth-child(3n){
+// 	margin-right: 0;
+// }
+&:hover{
+color: #4B9E5F;
+}
+}
+}
+</style>

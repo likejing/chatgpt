@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick } from 'vue'
 import { useDialog } from 'naive-ui'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useAppStore, useChatStore } from '@/store'
-import Setting from '@/components/common/Setting/index.vue'
-import Vip from '@/components/common/Vip/index.vue'
 import { t } from '@/locales'
 
 interface Props {
@@ -21,8 +19,8 @@ interface Emit {
 const { loading } = defineProps<Props>()
 
 const emit = defineEmits<Emit>()
-const showSetting = ref(false)
-const showVip = ref(false)
+// const showSetting = ref(false)
+// const showVip = ref(false)
 
 const appStore = useAppStore()
 const chatStore = useChatStore()
@@ -57,9 +55,9 @@ function handleClear() {
     onPositiveClick: () => emit('clean'),
   })
 }
-const isPremiumMember = computed(() => {
-  return chatStore.vipType === '1'
-})
+// const isPremiumMember = computed(() => {
+//   return chatStore.vipType === '1'
+// })
 </script>
 
 <template>
@@ -83,11 +81,11 @@ const isPremiumMember = computed(() => {
         {{ currentChatHistory?.title ?? '' }}
       </h1>
       <div class="flex items-center space-x-2">
-        <HoverButton @click="showVip = true">
+        <!-- <HoverButton @click="showVip = true">
           <span class="text-xl text-[#4f555e] dark:text-white">
             <SvgIcon :class="{ 'text-[#FFD700]': isPremiumMember }" icon="ri:vip-crown-line" />
           </span>
-        </HoverButton>
+        </HoverButton> -->
 
         <HoverButton @click="toggleUsingContext">
           <span class="text-xl" :class="{ 'text-[#4b9e5f]': usingContext, 'text-[#a8071a]': !usingContext }">
@@ -100,14 +98,14 @@ const isPremiumMember = computed(() => {
             <SvgIcon icon="ri:delete-bin-line" />
           </span>
         </HoverButton>
-        <HoverButton @click="showSetting = true">
+        <!-- <HoverButton @click="showSetting = true">
           <span class="text-xl text-[#4f555e] dark:text-white">
             <SvgIcon icon="ri:settings-4-line" />
           </span>
-        </HoverButton>
+        </HoverButton> -->
       </div>
     </div>
-    <Setting v-if="showSetting" v-model:visible="showSetting" />
-    <Vip v-if="showVip" v-model:visible="showVip" />
+    <!-- <Setting v-if="showSetting" v-model:visible="showSetting" />
+    <Vip v-if="showVip" v-model:visible="showVip" /> -->
   </header>
 </template>
